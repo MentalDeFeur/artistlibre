@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">artistLibre logo</title>
+  <desc id="desc">A colourful open-circle artist mark followed by the artistLibre wordmark.</desc>
+  <defs>
+    <linearGradient id="spectrum" x1="38" y1="286" x2="280" y2="49" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5B6E"/>
+      <stop offset=".43" stop-color="#A742C4"/>
+      <stop offset="1" stop-color="#316BFF"/>
+    </linearGradient>
+  </defs>
+  <!-- Open ring: a creative space rather than a closed frame. -->
+  <path d="M266 88A122 122 0 1 0 281 246" fill="none" stroke="url(#spectrum)" stroke-linecap="round" stroke-width="26"/>
+  <!-- Free, rising brush gesture. -->
+  <path d="M91 244c45-21 92-62 137-133 7-11 22-15 34-8l35 20c13 8 15 26 4 36-47 42-97 78-153 106-29 15-51 8-68-21 16 4 33 4 50 0Z" fill="url(#spectrum)"/>
+  <circle cx="84" cy="258" r="10" fill="#FF5B6E"/>
+  <path d="M109 285c13-4 23-3 31 3-8 8-19 11-34 8Z" fill="#A742C4"/>
+  <text x="350" y="213" fill="#172033" font-family="Montserrat, Avenir Next, Helvetica Neue, Arial, sans-serif" font-size="132" letter-spacing="-6"><tspan font-weight="700">artist</tspan><tspan font-weight="400">Libre</tspan></text>
+  <text x="357" y="260" fill="#687187" font-family="Montserrat, Avenir Next, Helvetica Neue, Arial, sans-serif" font-size="25" font-weight="600" letter-spacing="7">CRÉER SANS CADRE</text>
+</svg>
