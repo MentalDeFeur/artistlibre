@@ -1,115 +1,90 @@
-# 🎨 ArtistLibrePaint
+# 🎨 ArtistLibrePaint (Version GTK 4 / Rust)
 
-**ArtistLibrePaint** est une application open-source de dessin numérique et de retouche d'image basée sur **Python 3**, **GTK 4** (`PyGObject`) et **Cairo**. Elle offre une interface moderne à onglets, une gestion multi-calques et des outils de dessin fluides.
+**ArtistLibrePaint** est une application open-source de dessin numérique et de retouche d'image développée en **Rust**, **GTK 4** (`gtk4-rs`) et **Cairo** (`cairo-rs`). Elle offre une sécurité mémoire garantie par Rust, des performances maximales et une architecture modulaire.
+
+![Logo ArtistLibrePaint](logo.png)
 
 ---
 
 ## 🌟 Fonctionnalités
 
-- 📄 **Gestion multi-documents** : Ouvrez et travaillez sur plusieurs images simultanément via des onglets interactifs.
-- 🎨 **Outils de dessin en temps réel** :
-  - **Pinceau (✏️)** et **Gomme (🧹)** avec gestion de l'opacité et de la composition.
-  - **Sélecteur de couleur RGBA (`Gtk.ColorButton`)** pour une sélection précise.
-  - **Taille du pinceau réglable** de 1px à 100px.
+- 📄 **Gestion multi-documents** : Interface à onglets (`gtk4::Notebook`) avec fermeture dynamique.
+- 🎨 **Outils de dessin haute performance** :
+  - **Pinceau (✏️)** et **Gomme (🧹)** avec gestion de l'opacité et composition Alpha.
+  - **Sélecteur de couleur RGBA (`gtk4::ColorButton`)**.
+  - **Taille du pinceau réglable** de 1px à 100px via `gtk4::SpinButton`.
 - 🥞 **Gestion des calques** :
-  - Calques illimités avec fond transparent ou blanc.
-  - Ajout et suppression de calques.
-  - Composition en temps réel avec fusion alpha via Cairo.
+  - Calques bitmap indépendants (`cairo::ImageSurface` ARGB32).
+  - Ajout et suppression de calques dynamiques.
   - Bouton d'effacement rapide du calque actif.
-- 💾 **Exportation** : Exportez vos créations instantanément au format PNG.
-- 🖥️ **Interface réactive (GTK 4)** : Layout fluide avec barres d'outils rétractables et défilement adaptatif (`Gtk.ScrolledWindow`).
+- 💾 **Exportation PNG** : Sauvegarde directe des calques fusionnés.
+- ⚡ **Sécurité & Rapidité Rust** : Zéro fuite mémoire, zéro segmentation fault, gestion du multithread et des références partagées via `Rc<RefCell<T>>`.
 
 ---
 
 ## 🛠️ Prérequis système
 
-L'application repose sur GTK 4 et Cairo. Assurez-vous d'installer les bibliothèques système nécessaires :
+Pour compiler et exécuter ArtistLibrePaint en Rust, vous avez besoin de **Rust / Cargo** et des bibliothèques de développement GTK 4 :
 
 ### Ubuntu / Debian (Ubuntu 24.04+)
 ```bash
 sudo apt-get update
 sudo apt-get install -y \
-  python3-gi \
-  python3-gi-cairo \
-  gir1.2-gtk-4.0 \
-  libgirepository-2.0-dev \
+  build-essential \
+  cargo \
+  rustc \
+  libgtk-4-dev \
   libcairo2-dev \
-  pkg-config \
-  python3-dev
+  libgirepository-1.0-dev \
+  pkg-config
 ```
 
 ### Fedora / RHEL
 ```bash
 sudo dnf install -y \
-  python3-gobject \
-  gtk4 \
+  gcc \
+  cargo \
+  rust \
+  gtk4-devel \
   cairo-devel \
-  gobject-introspection-devel \
   pkg-config
 ```
 
 ### Arch Linux
 ```bash
-sudo pacman -S gtk4 python-gobject cairo pkgconf
+sudo pacman -S base-devel rust gtk4 cairo pkgconf
 ```
 
 ---
 
-## 🚀 Installation
+## 🚀 Compilations & Exécution
 
-### 1. Cloner le projet
+### 1. Compiler et Lancer en Mode Développement
 ```bash
-git clone https://github.com/votre-compte/artistlibre.git
-cd artistlibre
+cargo run
 ```
 
-### 2. Créer l'environnement virtuel avec les packages système
-Pour utiliser la liaison système `gi` (PyGObject) nativement :
-
+### 2. Compiler en Mode Release (Performances maximales)
 ```bash
-# Création de l'environnement virtuel avec accès aux libs système
-python3 -m venv env --system-site-packages
-
-# Activation de l'environnement
-source env/bin/activate
-```
-
-### 3. Installer les dépendances Python
-```bash
-pip install PyGObject pycairo
+cargo build --release
+./target/release/artistlibre
 ```
 
 ---
 
-## 💻 Utilisation
-
-Pour lancer l'application :
-
-```bash
-# S'assurer que le venv est activé
-source env/bin/activate
-
-# Lancer ArtistLibrePaint
-python3 code/init.py
-```
-
----
-
-## 🗂️ Structure du projet
+## 🗂️ Structure du Projet Rust
 
 ```
 artistlibre/
-├── code/
-│   └── init.py           # Point d'entrée et code source principal
+├── Cargo.toml            # Déclarations des dépendances (gtk4, cairo-rs, glib)
+├── src/
+│   ├── main.rs           # Point d'entrée de l'application
+│   ├── app.rs            # Interface GTK 4 (Fenêtre, HeaderBar, Ruban, Onglets)
+│   ├── document.rs       # Gestion du canevas, GestureDrag et rendus Cairo
+│   └── layer.rs          # Structure de calque bitmap (cairo::ImageSurface)
 ├── README.md             # Présentation et guide de démarrage rapide
-└── DOCUMENTATION.md      # Architecture technique et guide du développeur
+└── DOCUMENTATION.md      # Architecture technique et guide Rust
 ```
-
----
-
-## 📖 En savoir plus
-
-Pour une description détaillée des classes, de la gestion des événements GTK 4 et du rendu Cairo, consultez la [Documentation Technique](DOCUMENTATION.md).
 
 ---
 
