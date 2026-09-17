@@ -10,7 +10,8 @@
 
 - 📄 **Gestion multi-documents** : Interface à onglets (`gtk4::Notebook`) avec fermeture dynamique.
 - 🎨 **Outils de dessin haute performance** :
-  - **Pinceau (✏️)** et **Gomme (🧹)** avec gestion de l'opacité et composition Alpha.
+  - **Pinceau (✏️)**, **crayon**, **encre**, **marqueur**, **aérographe**, **spray**, **calligraphie** et **craie**.
+  - **Gomme (🧹)** avec gestion de l'opacité et composition Alpha.
   - **Sélecteur de couleur RGBA (`gtk4::ColorButton`)**.
   - **Taille du pinceau réglable** de 1px à 100px via `gtk4::SpinButton`.
 - 🥞 **Gestion des calques** :
@@ -69,6 +70,39 @@ cargo run
 cargo build --release
 ./target/release/artistlibre
 ```
+
+### 3. Intégrer l'application au menu KDE Plasma
+
+Après avoir installé le binaire dans un répertoire présent dans le `PATH`, copiez
+le fichier `data/org.artistlibre.ArtistLibrePaint.desktop` dans
+`~/.local/share/applications/`. KDE pourra alors lancer ArtistLibrePaint depuis
+le menu des applications.
+
+### 4. Choisir le backend graphique
+
+La session GNOME utilise GTK 4. Pour utiliser le backend Qt dans KDE/Plasma,
+installez les paquets de développement Qt 5 et `qmake` de votre distribution :
+
+```bash
+# Debian / Ubuntu
+sudo apt-get install -y qtbase5-dev qt5-qmake
+
+# Fedora
+sudo dnf install -y qt5-qtbase-devel
+
+# Arch Linux
+sudo pacman -S qt5-base
+```
+
+Compilez ensuite avec :
+
+```bash
+cargo run --features qt
+```
+
+La détection utilise `XDG_CURRENT_DESKTOP`, `XDG_SESSION_DESKTOP` et
+`DESKTOP_SESSION`. Sans la feature `qt`, une session KDE utilise automatiquement
+le backend GTK comme solution de repli.
 
 ---
 

@@ -5,8 +5,20 @@ edition = "2021"
 authors = ["ArtistLibre Development Team"]
 description = "Application libre de dessin numérique et retouche d'image en GTK 4 et Rust"
 
+[features]
+default = []
+qt = ["dep:qt_widgets"]
+
+[[bin]]
+name = "artistlibre"
+path = "src/artistlibrepaint/main.rs"
+
 [dependencies]
 gtk4 = { version = "0.9", features = ["v4_10"] }
 cairo-rs = { version = "0.20", features = ["use_glib", "png"] }
 glib = "0.20"
 gdk4 = "0.9"
+
+[dependencies.qt_widgets]
+version = "0.5"
+optional = true

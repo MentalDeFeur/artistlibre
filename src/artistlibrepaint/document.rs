@@ -11,6 +11,32 @@ pub enum Tool {
     Eraser,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum BrushKind {
+    Round,
+    Pencil,
+    Ink,
+    Marker,
+    Airbrush,
+    Spray,
+    Calligraphy,
+    Chalk,
+}
+
+impl BrushKind {
+    pub const ALL: [(Self, &'static str); 8] = [
+        (Self::Round, "Pinceau rond"),
+        (Self::Pencil, "Crayon"),
+        (Self::Ink, "Encre"),
+        (Self::Marker, "Marqueur"),
+        (Self::Airbrush, "Aérographe"),
+        (Self::Spray, "Spray"),
+        (Self::Calligraphy, "Calligraphie"),
+        (Self::Chalk, "Craie"),
+    ];
+
+}
+
 pub struct DocumentState {
     pub title: String,
     pub width: i32,
@@ -18,6 +44,7 @@ pub struct DocumentState {
     pub layers: Vec<Layer>,
     pub active_layer_idx: usize,
     pub tool: Tool,
+    pub brush_kind: BrushKind,
     pub brush_size: f64,
     pub brush_color: (f64, f64, f64, f64), // RGBA
     pub last_x: f64,
@@ -45,6 +72,7 @@ impl DocumentPage {
             layers: vec![bg_layer],
             active_layer_idx: 0,
             tool: Tool::Brush,
+            brush_kind: BrushKind::Round,
             brush_size: 5.0,
             brush_color: (0.0, 0.0, 0.0, 1.0),
             last_x: 0.0,
@@ -129,10 +157,6 @@ impl DocumentPage {
         }
 
         if let Ok(cr) = Context::new(&layer.surface) {
-            cr.set_line_cap(LineCap::Round);
-            cr.set_line_join(LineJoin::Round);
-            cr.set_line_width(st.brush_size);
-
             match st.tool {
                 Tool::Eraser => {
                     cr.set_operator(Operator::Clear);
@@ -144,9 +168,55 @@ impl DocumentPage {
                 }
             }
 
-            cr.move_to(x1, y1);
-            cr.line_to(x2, y2);
-            let _ = cr.stroke();
+            match st.brush_kind {
+                BrushKind::Round => Self::draw_line(&cr, x1, y1, x2, y2, st.brush_size, LineCap::Round),
+                BrushKind::Pencil => {
+                    cr.set_source_rgba(st.brush_color.0, st.brush_color.1, st.brush_color.2, st.brush_color.3 * 0.65);
+                    Self::draw_line(&cr, x1, y1, x2, y2, st.brush_size * 0.7, LineCap::Round);
+                }
+                BrushKind::Ink => Self::draw_line(&cr, x1, y1, x2, y2, st.brush_size * 1.25, LineCap::Round),
+                BrushKind::Marker => {
+                    cr.set_source_rgba(st.brush_color.0, st.brush_color.1, st.brush_color.2, st.brush_color.3 * 0.35);
+                    Self::draw_line(&cr, x1, y1, x2, y2, st.brush_size * 2.4, LineCap::Square);
+                }
+                BrushKind::Calligraphy => Self::draw_line(&cr, x1, y1, x2, y2, st.brush_size * 0.55, LineCap::Butt),
+                BrushKind::Chalk => {
+                    cr.set_source_rgba(st.brush_color.0, st.brush_color.1, st.brush_color.2, st.brush_color.3 * 0.55);
+                    cr.set_dash(&[st.brush_size * 0.45, st.brush_size * 0.7], 0.0);
+                    Self::draw_line(&cr, x1, y1, x2, y2, st.brush_size * 1.3, LineCap::Round);
+                    cr.set_dash(&[], 0.0);
+                }
+                BrushKind::Airbrush => Self::draw_soft_dots(&cr, x1, y1, x2, y2, st.brush_size, false),
+                BrushKind::Spray => Self::draw_soft_dots(&cr, x1, y1, x2, y2, st.brush_size, true),
+            }
+        }
+    }
+
+    fn draw_line(cr: &Context, x1: f64, y1: f64, x2: f64, y2: f64, width: f64, cap: LineCap) {
+        cr.set_line_cap(cap);
+        cr.set_line_join(LineJoin::Round);
+        cr.set_line_width(width.max(1.0));
+        cr.move_to(x1, y1);
+        cr.line_to(x2, y2);
+        let _ = cr.stroke();
+    }
+
+    fn draw_soft_dots(cr: &Context, x1: f64, y1: f64, x2: f64, y2: f64, size: f64, spray: bool) {
+        let distance = ((x2 - x1).powi(2) + (y2 - y1).powi(2)).sqrt();
+        let steps = (distance / (size.max(1.0) * 0.35)).ceil().max(1.0) as usize;
+        let dots = if spray { 10 } else { 4 };
+        for step in 0..=steps {
+            let progress = step as f64 / steps as f64;
+            let x = x1 + (x2 - x1) * progress;
+            let y = y1 + (y2 - y1) * progress;
+            for dot in 0..dots {
+                let angle = (step * dots + dot) as f64 * 2.399;
+                let radius = if spray { size * (0.5 + (dot % 5) as f64 * 0.35) } else { size * 0.35 };
+                let dot_x = x + angle.cos() * radius;
+                let dot_y = y + angle.sin() * radius;
+                cr.arc(dot_x, dot_y, (size * if spray { 0.12 } else { 0.3 }).max(0.5), 0.0, std::f64::consts::TAU);
+                let _ = cr.fill();
+            }
         }
     }
 

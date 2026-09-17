@@ -1,9 +1,10 @@
-use crate::document::{DocumentPage, Tool};
+use crate::document::{BrushKind, DocumentPage, Tool};
 use gdk4::RGBA;
 use gtk4::prelude::*;
 use gtk4::{
     Adjustment, Application, ApplicationWindow, Box as GtkBox, Button, ColorDialog,
-    ColorDialogButton, HeaderBar, Label, Notebook, Orientation, SpinButton, Stack, StackSwitcher,
+    ColorDialogButton, DropDown, HeaderBar, Label, Notebook, Orientation, SpinButton, Stack,
+    StackSwitcher, StringObject,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -21,7 +22,7 @@ pub struct ArtistLibreApp {
 impl ArtistLibreApp {
     pub fn new() -> Self {
         let app = Application::builder()
-            .application_id("org.example.ArtistLibrePaint")
+            .application_id("org.artistlibre.ArtistLibrePaint")
             .build();
 
         app.connect_activate(Self::build_ui);
@@ -126,6 +127,29 @@ impl ArtistLibreApp {
             }
         });
         tools_box.append(&btn_eraser);
+
+        tools_box.append(&Label::new(Some("Brosse :")));
+        let brush_labels: Vec<&str> = BrushKind::ALL.iter().map(|(_, label)| *label).collect();
+        let brush_dropdown = DropDown::from_strings(&brush_labels);
+        brush_dropdown.set_selected(0);
+        let state_brush_kind = state.clone();
+        let notebook_brush_kind = notebook.clone();
+        brush_dropdown.connect_selected_notify(move |dropdown| {
+            let Some(item) = dropdown.selected_item() else { return };
+            let Ok(item) = item.downcast::<StringObject>() else { return };
+            let Some((kind, _)) = BrushKind::ALL
+                .iter()
+                .find(|(_, label)| item.string().as_str() == *label)
+            else {
+                return;
+            };
+            let Some(page_idx) = notebook_brush_kind.current_page() else { return };
+            let st = state_brush_kind.borrow();
+            if (page_idx as usize) < st.documents.len() {
+                st.documents[page_idx as usize].state.borrow_mut().brush_kind = *kind;
+            }
+        });
+        tools_box.append(&brush_dropdown);
 
         tools_box.append(&Label::new(Some("Couleur :")));
 
